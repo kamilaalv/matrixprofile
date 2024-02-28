@@ -324,6 +324,60 @@ def plot_av_mp(profile):
     return fig
 
 
+# def plot_discords_mp(profile):
+#     """
+#     Plot discords for a MatrixProfile data structure.
+
+#     Parameters
+#     ----------
+#     profile : dict_like
+#         The matrix profile object to plot.
+
+#     Returns
+#     -------
+#     matplotlib.Figure : figure
+#         The matplotlib figure object.
+
+#     """
+#     mp = profile['mp']
+#     w = profile['w']
+#     discords = profile['discords']
+#     data = profile.get('data', None)
+#     if data:
+#         ts = data.get('ts', None)
+
+#     mp_adjusted = np.append(mp, np.full(w + 1, np.nan))
+
+#     fig, axes = plt.subplots(3, 1, sharex=True, figsize=(15, 7), gridspec_kw={'height_ratios': [25, 5, 25]})
+
+#     pos = axes[1].imshow([mp_adjusted,], aspect='auto', cmap='coolwarm')
+#     axes[1].set_yticks([])
+#     axes[0].plot(np.arange(len(ts)), ts)
+#     axes[0].set_ylabel('Data')
+
+#     axes[2].plot(np.arange(len(mp_adjusted)), mp_adjusted)
+#     axes[2].set_ylabel('Matrix Profile')
+#     axes[2].set_title('Window Size {}'.format(w))
+
+#     for idx in discords:
+#         axes[2].plot(idx, mp_adjusted[idx], c='r', marker='*', lw=0, markersize=10)
+
+#     fig.subplots_adjust(right=0.8)
+#     cbar_ax = fig.add_axes([1, 0.46, 0.01, 0.1])
+#     fig.colorbar(pos, orientation='vertical', cax=cbar_ax, use_gridspec=True)
+
+#     lines = [
+#         Line2D([0], [0], color='red', marker='*', lw=0),
+#         Line2D([0], [0], color='blue'),
+#     ]
+#     fig.legend(lines, ['Discord', 'MP'], bbox_to_anchor=(1.07, 0.44))
+
+#     fig.tight_layout()
+
+#     return fig
+
+import matplotlib.pyplot as plt
+
 def plot_discords_mp(profile):
     """
     Plot discords for a MatrixProfile data structure.
@@ -337,45 +391,80 @@ def plot_discords_mp(profile):
     -------
     matplotlib.Figure : figure
         The matplotlib figure object.
-
     """
-    mp = profile['mp']
-    w = profile['w']
-    discords = profile['discords']
-    data = profile.get('data', None)
-    if data:
-        ts = data.get('ts', None)
+    mp_adjusted = np.append(profile['mp'], np.zeros(profile['w'] - 1) + np.nan)
 
-    mp_adjusted = np.append(mp, np.full(w + 1, np.nan))
+    fig, ax = plt.subplots(1, 1, sharex=True, figsize=(20, 7))
+    ax.plot(np.arange(len(profile['data']['ts'])), profile['data']['ts'])
+    ax.set_title('Raw Data', size=22)
 
-    fig, axes = plt.subplots(3, 1, sharex=True, figsize=(15, 7), gridspec_kw={'height_ratios': [25, 5, 25]})
-
-    pos = axes[1].imshow([mp_adjusted,], aspect='auto', cmap='coolwarm')
-    axes[1].set_yticks([])
-    axes[0].plot(np.arange(len(ts)), ts)
-    axes[0].set_ylabel('Data')
-
-    axes[2].plot(np.arange(len(mp_adjusted)), mp_adjusted)
-    axes[2].set_ylabel('Matrix Profile')
-    axes[2].set_title('Window Size {}'.format(w))
-
-    for idx in discords:
-        axes[2].plot(idx, mp_adjusted[idx], c='r', marker='*', lw=0, markersize=10)
-
-    fig.subplots_adjust(right=0.8)
-    cbar_ax = fig.add_axes([1, 0.46, 0.01, 0.1])
-    fig.colorbar(pos, orientation='vertical', cax=cbar_ax, use_gridspec=True)
-
-    lines = [
-        Line2D([0], [0], color='red', marker='*', lw=0),
-        Line2D([0], [0], color='blue'),
-    ]
-    fig.legend(lines, ['Discord', 'MP'], bbox_to_anchor=(1.07, 0.44))
-
-    fig.tight_layout()
+    for discord in profile['discords']:
+        x = np.arange(discord, discord + profile['w'])
+        y = profile['data']['ts'][discord:discord + profile['w']]
+        ax.plot(x, y, c='r')
 
     return fig
 
+
+
+# def plot_discords_pmp(profile):
+#     """
+#     Plot discords for the given Pan-MatrixProfile data structure.
+
+#     Parameters
+#     ----------
+#     profile : dict_like
+#         The pmp object to plot.
+
+#     Returns
+#     -------
+#     matplotlib.Figure : figure
+#         The matplotlib figure object.
+
+#     """
+#     discord_figures = []
+
+#     for discord in profile['discords']:
+#         mp_idx = discord[0]
+#         idx = discord[1]
+#         w = profile['windows'][mp_idx]
+
+#         data = profile.get('data', None)
+#         if data:
+#             ts = data.get('ts', None)
+
+#         mp_adjusted = profile['pmp'][mp_idx]
+#         # mp_adjusted = np.append(mp, np.full(w + 1, np.nan))
+
+#         fig, axes = plt.subplots(3, 1, sharex=True, figsize=(15, 7), gridspec_kw={'height_ratios': [25, 5, 25]})
+
+#         pos = axes[1].imshow([mp_adjusted,], aspect='auto', cmap='coolwarm')
+#         axes[1].set_yticks([])
+#         axes[0].plot(np.arange(len(ts)), ts)
+#         axes[0].set_ylabel('Data')
+
+#         axes[2].plot(np.arange(len(mp_adjusted)), mp_adjusted)
+#         axes[2].set_ylabel('Matrix Profile')
+
+#         # for idx in discords:
+#         axes[2].plot(idx, mp_adjusted[idx], c='r', marker='*', lw=0, markersize=10)
+#         axes[2].set_title('Window Size = {}'.format(w))
+
+#         fig.subplots_adjust(right=0.8)
+#         cbar_ax = fig.add_axes([1, 0.46, 0.01, 0.1])
+#         fig.colorbar(pos, orientation='vertical', cax=cbar_ax, use_gridspec=True)
+
+#         lines = [
+#             Line2D([0], [0], color='red', marker='*', lw=0),
+#             Line2D([0], [0], color='blue'),
+#         ]
+#         fig.legend(lines, ['Discord', 'MP'], bbox_to_anchor=(1.07, 0.44))
+
+#         fig.tight_layout()
+
+#         discord_figures.append(fig)
+
+#     return discord_figures
 
 def plot_discords_pmp(profile):
     """
@@ -388,9 +477,8 @@ def plot_discords_pmp(profile):
 
     Returns
     -------
-    matplotlib.Figure : figure
-        The matplotlib figure object.
-
+    list of matplotlib.Figure : discord_figures
+        The list of matplotlib figure objects.
     """
     discord_figures = []
 
@@ -404,25 +492,17 @@ def plot_discords_pmp(profile):
             ts = data.get('ts', None)
 
         mp_adjusted = profile['pmp'][mp_idx]
-        # mp_adjusted = np.append(mp, np.full(w + 1, np.nan))
 
-        fig, axes = plt.subplots(3, 1, sharex=True, figsize=(15, 7), gridspec_kw={'height_ratios': [25, 5, 25]})
+        fig, ax = plt.subplots(1, 1, sharex=True, figsize=(15, 7))
 
-        pos = axes[1].imshow([mp_adjusted,], aspect='auto', cmap='coolwarm')
-        axes[1].set_yticks([])
-        axes[0].plot(np.arange(len(ts)), ts)
-        axes[0].set_ylabel('Data')
+        ax.plot(np.arange(len(ts)), ts)
+        ax.set_title('Original Data (Window Size = {})'.format(w))
 
-        axes[2].plot(np.arange(len(mp_adjusted)), mp_adjusted)
-        axes[2].set_ylabel('Matrix Profile')
+        for discord_idx in range(idx, idx + w):
+            ax.plot(discord_idx, ts[discord_idx], c='r', marker='.', lw=0, markersize=3)
 
-        # for idx in discords:
-        axes[2].plot(idx, mp_adjusted[idx], c='r', marker='*', lw=0, markersize=10)
-        axes[2].set_title('Window Size = {}'.format(w))
-
-        fig.subplots_adjust(right=0.8)
-        cbar_ax = fig.add_axes([1, 0.46, 0.01, 0.1])
-        fig.colorbar(pos, orientation='vertical', cax=cbar_ax, use_gridspec=True)
+        ax.set_ylabel('Value')
+        ax.set_xlabel('Index')
 
         lines = [
             Line2D([0], [0], color='red', marker='*', lw=0),
@@ -435,6 +515,7 @@ def plot_discords_pmp(profile):
         discord_figures.append(fig)
 
     return discord_figures
+
 
 
 def plot_motifs_mp(profile):
